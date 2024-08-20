@@ -1,0 +1,67 @@
+---
+title: "bird_joins.qmd"
+author: "Amanda Overbye"
+date: "2024-08-20"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(here)
+library(dplyr)
+library(lubridate)
+```
+
+```{r}
+bird_observation <- read.csv(here("data", "52_pp52_birds_1.csv"))
+sites <- read.csv(here("data", "52_pp52_sites_1.csv"))
+surveys <- read.csv(here("data", "52_pp52_surveys_1.csv"))
+taxalist <- read.csv(here("data", "52_pp52_taxalist_1.csv"))
+```
+
+
+```{r}
+bird_subsets <- bird_observation |>
+  filter(species_id %in% c("BHCO", "RWBL"), 
+         site_id %in% c("LI-W", "NU-C"))
+  
+```
+
+```{r}
+birds_left <- left_join(birds_left, taxalist, by = "species_id")
+birds_left <- left_join(birds_left, sites, by = "site_id")
+```
+
+```{r}
+birds_full <- full_join(bird_subsets, sites, by = "site_id")
+```
+
+```{r}
+birds <- birds_full |>
+rename(bird_obs_notes = notes)
+```
+
+```{r}
+birds_full_all <- full_join(birds, surveys, by = "site_id" )
+birds_full_all <- full_join(birds_full_all, taxalist, by = "species_id")
+```
+
+```{r}
+birds_full_subset <- birds_full_all |>
+  select(c(survey_date, common_name, bird_count, park_name))
+```
+
+```{r}
+birds_full_month <- birds_full_subset |>
+  mutate(survey_month = month(survey_date))
+```
+
+```{r}
+class(birds_full_month)
+birds_month <- birds_full_month |>
+  mutate(survey_month = as.numeric(survey_month))
+```
+
